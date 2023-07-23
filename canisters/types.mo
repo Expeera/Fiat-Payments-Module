@@ -9,11 +9,18 @@ module {
         owner: Principal;
         amount: Float;
         status: Text;
+        items: [Item];
         transactionId: Text;
         paymentLink: Text;
         paymentMethod: Text;
         currency: Text;
         createdAt: Int;
+    };
+
+    public type Item = {
+        id: Nat;
+        name: Text;
+        price: Float;
     };
     
     public module InvoiceStatus = {
@@ -23,11 +30,17 @@ module {
         public let CancelledByAdmin     : Text = "Cancelled by admin";
     };
 
+    public type CreateSession = {
+        id: Text;
+        url: Text;
+    };
+
     public module Request {
         public type CreateInvoiceBody = {
             amount: Float;
             paymentMethod: Text;
             currency: Text;
+            items: [Item];
         }; 
 
         public type ConfirmInvoiceBody = {

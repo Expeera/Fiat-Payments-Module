@@ -24,6 +24,11 @@ module {
         Text.equal(Text.trim(text, #char ' '), "");
     };
 
+    public func isEqual(text1: Text, text2: Text): Bool {
+        // Trim leading and trailing whitespace from the text and compare it to an empty string
+        Text.equal(Text.map(text1, Prim.charToLower), Text.map(text2, Prim.charToLower))
+    };
+
     // Function to check if a number is greater than zero
     public func isGreaterThanZero(number: Float): Bool {
         // Compare the number to zero

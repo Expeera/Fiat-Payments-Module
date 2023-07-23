@@ -21,9 +21,15 @@ export const idlFactory = ({ IDL }) => {
     'message' : IDL.Text,
     'status_code' : StatusCode,
   });
+  const Item = IDL.Record({
+    'id' : IDL.Nat,
+    'name' : IDL.Text,
+    'price' : IDL.Float64,
+  });
   const CreateInvoiceBody = IDL.Record({
     'paymentMethod' : IDL.Text,
     'currency' : IDL.Text,
+    'items' : IDL.Vec(Item),
     'amount' : IDL.Float64,
   });
   const CreateInvoiceBody__1 = IDL.Record({
@@ -51,6 +57,7 @@ export const idlFactory = ({ IDL }) => {
     'createdAt' : IDL.Int,
     'currency' : IDL.Text,
     'paymentLink' : IDL.Text,
+    'items' : IDL.Vec(Item),
     'amount' : IDL.Float64,
     'transactionId' : IDL.Text,
   });
@@ -63,6 +70,7 @@ export const idlFactory = ({ IDL }) => {
     'get_my_invoices' : IDL.Func([], [IDL.Vec(Invoice)], ['query']),
     'invoiceCount' : IDL.Func([], [IDL.Nat], []),
     'isOwner' : IDL.Func([], [IDL.Bool], ['query']),
+    'test1' : IDL.Func([IDL.Text], [IDL.Text], []),
   });
 };
 export const init = ({ IDL }) => { return []; };

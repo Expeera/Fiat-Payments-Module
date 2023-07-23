@@ -15,6 +15,7 @@ export interface ConfirmInvoiceBody__1 {
 export interface CreateInvoiceBody {
   'paymentMethod' : string,
   'currency' : string,
+  'items' : Array<Item>,
   'amount' : number,
 }
 export interface CreateInvoiceBody__1 {
@@ -29,9 +30,11 @@ export interface Invoice {
   'createdAt' : bigint,
   'currency' : string,
   'paymentLink' : string,
+  'items' : Array<Item>,
   'amount' : number,
   'transactionId' : string,
 }
+export interface Item { 'id' : bigint, 'name' : string, 'price' : number }
 export interface Response {
   'status' : boolean,
   'body' : ResponseStatus,
@@ -58,4 +61,5 @@ export interface _SERVICE {
   'get_my_invoices' : ActorMethod<[], Array<Invoice>>,
   'invoiceCount' : ActorMethod<[], bigint>,
   'isOwner' : ActorMethod<[], boolean>,
+  'test1' : ActorMethod<[string], string>,
 }

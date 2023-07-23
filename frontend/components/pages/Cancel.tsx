@@ -22,7 +22,7 @@ export default function Cancel() {
       
       let data: ConfirmInvoiceBody = {
         invoiceNo: parseInt(invoiceNo),
-        paymentMethod: "stripe",
+        paymentMethod: window.location.pathname.startsWith("/stripe") ? "stripe" : "paypal",
         isSuccess: false,
       }
       console.log("data", data);

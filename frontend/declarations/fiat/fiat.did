@@ -23,12 +23,19 @@ type Response =
    status: bool;
    status_code: StatusCode;
  };
+type Item = 
+ record {
+   id: nat;
+   name: text;
+   price: float64;
+ };
 type Invoice = 
  record {
    amount: float64;
    createdAt: int;
    currency: text;
    id: nat;
+   items: vec Item;
    owner: principal;
    paymentLink: text;
    paymentMethod: text;
@@ -47,6 +54,7 @@ type CreateInvoiceBody =
  record {
    amount: float64;
    currency: text;
+   items: vec Item;
    paymentMethod: text;
  };
 type ConfirmInvoiceBody__1 = 
@@ -71,4 +79,5 @@ service : {
   get_my_invoices: () -> (vec Invoice) query;
   invoiceCount: () -> (nat);
   isOwner: () -> (bool) query;
+  test1: (text) -> (text);
 }

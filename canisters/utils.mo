@@ -1,6 +1,7 @@
 import Iter "mo:base/Iter";
 import Array "mo:base/Array";
 import Nat8 "mo:base/Nat8";
+import Nat32 "mo:base/Nat32";
 import Trie "mo:base/Trie";
 import Hash "mo:base/Hash";
 import Char "mo:base/Char";
@@ -30,4 +31,25 @@ module {
             message = message;
         };
     };
+
+    public func text2Nat8Array(txt:Text) : [Nat8] {
+        let arr = Array.init<Nat8>(Text.size(txt), 0);
+        var i = 0;
+        let chars = txt.chars();
+        for (c in chars){
+            arr[i] := Nat8.fromNat(Nat32.toNat(Char.toNat32(c)));
+            i += 1;
+        };
+        Array.freeze(arr)
+    };
+
+    public func nat8Arr2Text(arr: [Nat8]): Text {
+        var res: Text = "";
+        var toIter: Iter.Iter<Nat8> = Array.vals(arr);
+        for(val in toIter) {
+            res := res # Nat8.toText(val);
+        };
+        res
+    };
+
 };

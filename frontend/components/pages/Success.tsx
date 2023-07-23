@@ -22,7 +22,7 @@ export default function Success() {
       
       let data: ConfirmInvoiceBody = {
         invoiceNo: parseInt(invoiceNo),
-        paymentMethod: "stripe",
+        paymentMethod: window.location.pathname.startsWith("/stripe") ? "stripe" : "paypal",
         isSuccess: true,
       }
       console.log("data", data);

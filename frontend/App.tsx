@@ -26,6 +26,7 @@ import Form from "./components/pages/Form"
 import Success from "./components/pages/Success"
 import Admin from "./components/pages/Admin"
 import Cancel from "./components/pages/Cancel"
+import "bootstrap/dist/css/bootstrap.min.css"
 
 interface AppStateInterface {
   authClient?: AuthClient
@@ -107,8 +108,18 @@ function App() {
             <Route path="/auth" element={<DefaultLayout />}>
               <Route path="login" element={<Login />}></Route>
             </Route>
-            <Route path="stripe/success/:invoiceNo/:sessionId" element={<Success />} />
-            <Route path="stripe/cancel/:invoiceNo/:sessionId" element={<Cancel />} />
+            <Route
+              path="stripe/success/:invoiceNo/:sessionId"
+              element={<Success />}
+            />
+            <Route
+              path="stripe/cancel/:invoiceNo/:sessionId"
+              element={<Cancel />}
+            />
+
+            <Route path="paypal/success/:invoiceNo" element={<Success />} />
+            <Route path="paypal/cancel/:invoiceNo" element={<Cancel />} />
+
             <Route path="/invoice" element={<Form />} />
             <Route path="/admin" element={<Admin />} />
             <Route

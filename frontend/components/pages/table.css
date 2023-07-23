@@ -1,7 +1,8 @@
 /* Table.css */
 
 .table-container {
-  overflow-x: auto;
+  /* overflow-x: scroll; */
+  /* margin: 10px 20px; */
 }
 
 .styled-table {
@@ -11,6 +12,8 @@
   font-family: sans-serif;
   min-width: 400px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+  width: max-content;
+  overflow: scroll;
 }
 
 .styled-table thead tr {
@@ -32,4 +35,23 @@
 .styled-table tbody tr.active-row {
   font-weight: bold;
   color: #009879;
+}
+.table-select {
+  padding: 0.375rem 0.5rem;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #495057;
+  vertical-align: middle;
+  border-radius: 0.25rem;
+  background-color: #fff;
+  background-image: none;
+  border: 1px solid #ced4da;
+  appearance: none;
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 16px 12px;
+}
+.table-select option {
+  padding: 0.75rem;
 }

@@ -18,4 +18,14 @@ module {
         "http://"# frontendCanisterId # "."# local_base_url #  "/stripe/cancel/"# Nat.toText(invoiceNo) #"/{CHECKOUT_SESSION_ID}"
     };
 
+    // Function to generate the Paypal success URL for a specific invoice
+    public func get_paypal_success_url (invoiceNo:Nat): Text { 
+        "http://"# frontendCanisterId #"."# local_base_url # "/paypal/success/"# Nat.toText(invoiceNo)
+    };
+
+     // Function to generate the Paypal cancel URL for a specific invoice
+    public func get_paypal_cancel_url (invoiceNo:Nat): Text { 
+        "http://"# frontendCanisterId # "."# local_base_url #  "/paypal/cancel/"# Nat.toText(invoiceNo)
+    };
+
 }
