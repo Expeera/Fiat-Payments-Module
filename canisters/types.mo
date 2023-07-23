@@ -48,6 +48,12 @@ module {
             paymentMethod: Text;
             isSuccess: Bool;
         }; 
+
+        public type ConfirmInvoiceAdminBody = {
+            invoiceNo: Nat;
+            paymentMethod: Text;
+            isCompleted: Bool;
+        }; 
     };
 
      public module Response {

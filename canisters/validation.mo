@@ -50,5 +50,4 @@ module {
         // Check if the filtered array is empty, indicating that the payment method is not found
         ele.size() == 0;
     };
-
 }

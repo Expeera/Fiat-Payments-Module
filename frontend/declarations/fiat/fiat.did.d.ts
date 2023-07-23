@@ -1,6 +1,11 @@
 import type { Principal } from '@dfinity/principal';
 import type { ActorMethod } from '@dfinity/agent';
 
+export interface ConfirmInvoiceAdminBody {
+  'paymentMethod' : string,
+  'isCompleted' : boolean,
+  'invoiceNo' : bigint,
+}
 export interface ConfirmInvoiceBody {
   'paymentMethod' : string,
   'invoiceNo' : bigint,
@@ -42,8 +47,12 @@ export interface Response {
   'status_code' : StatusCode,
 }
 export type ResponseStatus = { 'err' : {} } |
-  { 'success' : CreateInvoiceBody__1 };
+  { 'success' : Array<Invoice> };
 export type ResponseStatus_1 = { 'err' : {} } |
+  { 'success' : CreateInvoiceBody__1 };
+export type ResponseStatus_2 = { 'err' : {} } |
+  { 'success' : boolean };
+export type ResponseStatus_3 = { 'err' : {} } |
   { 'success' : ConfirmInvoiceBody__1 };
 export interface Response_1 {
   'status' : boolean,
@@ -51,15 +60,30 @@ export interface Response_1 {
   'message' : string,
   'status_code' : StatusCode,
 }
+export interface Response_2 {
+  'status' : boolean,
+  'body' : ResponseStatus_2,
+  'message' : string,
+  'status_code' : StatusCode,
+}
+export interface Response_3 {
+  'status' : boolean,
+  'body' : ResponseStatus_3,
+  'message' : string,
+  'status_code' : StatusCode,
+}
 export type StatusCode = bigint;
 export interface _SERVICE {
-  'change_invoice_status' : ActorMethod<[ConfirmInvoiceBody], Response_1>,
-  'create_invoice' : ActorMethod<[CreateInvoiceBody], Response>,
+  'change_invoice_status' : ActorMethod<[ConfirmInvoiceBody], Response_3>,
+  'change_invoice_status_to_admin' : ActorMethod<
+    [ConfirmInvoiceAdminBody],
+    Response_2
+  >,
+  'create_invoice' : ActorMethod<[CreateInvoiceBody], Response_1>,
   'getOwner' : ActorMethod<[], string>,
   'get_actor_id_as_text' : ActorMethod<[], string>,
-  'get_all_invoices_to_admin' : ActorMethod<[], Array<Invoice>>,
+  'get_all_invoices_to_admin' : ActorMethod<[], Response>,
   'get_my_invoices' : ActorMethod<[], Array<Invoice>>,
   'invoiceCount' : ActorMethod<[], bigint>,
   'isOwner' : ActorMethod<[], boolean>,
-  'test1' : ActorMethod<[string], string>,
 }

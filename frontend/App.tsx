@@ -27,6 +27,7 @@ import Success from "./components/pages/Success"
 import Admin from "./components/pages/Admin"
 import Cancel from "./components/pages/Cancel"
 import "bootstrap/dist/css/bootstrap.min.css"
+import MyInvoices from "./components/pages/myInvoices"
 
 interface AppStateInterface {
   authClient?: AuthClient
@@ -121,6 +122,7 @@ function App() {
             <Route path="paypal/cancel/:invoiceNo" element={<Cancel />} />
 
             <Route path="/invoice" element={<Form />} />
+            <Route path="/myinvoices" element={<MyInvoices />} />
             <Route path="/admin" element={<Admin />} />
             <Route
               path="/"

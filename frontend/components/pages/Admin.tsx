@@ -14,73 +14,83 @@ export default function Admin() {
       console.log(ownerValue)
 
       if (!ownerValue) {
-        navigate("/invoice")
+        // navigate("/invoice")
       }
     }
 
     checkIsOwner()
   }, [isOwner, navigate])
-  // const dummyData = [
-  //   {
-  //     id: "1",
-  //     owner: "John Doe",
-  //     amount: 100,
-  //     currency: "USD",
-  //     paymentMethod: "Credit Card",
-  //     status: "Paid",
-  //     createdAt: Date.now() - 86400000, // 1 day ago
-  //   },
-  //   {
-  //     id: "2",
-  //     owner: "Jane Smith",
-  //     amount: 50,
-  //     currency: "EUR",
-  //     paymentMethod: "PayPal",
-  //     status: "Pending",
-  //     createdAt: Date.now() - 172800000, // 2 days ago
-  //   },
-  //   {
-  //     id: "3",
-  //     owner: "Michael Johnson",
-  //     amount: 200,
-  //     currency: "GBP",
-  //     paymentMethod: "Bank Transfer",
-  //     status: "Paid",
-  //     createdAt: Date.now() - 259200000, // 3 days ago
-  //   },
-  //   {
-  //     id: "4",
-  //     owner: "Emily Brown",
-  //     amount: 75,
-  //     currency: "CAD",
-  //     paymentMethod: "Credit Card",
-  //     status: "Paid",
-  //     createdAt: Date.now() - 345600000, // 4 days ago
-  //   },
-  //   {
-  //     id: "5",
-  //     owner: "William Lee",
-  //     amount: 120,
-  //     currency: "AUD",
-  //     paymentMethod: "PayPal",
-  //     status: "Pending",
-  //     createdAt: Date.now() - 432000000, // 5 days ago
-  //   },
-  // ]
+  const dummyData = [
+    {
+      id: "1",
+      owner: "John Doe",
+      amount: 100,
+      currency: "USD",
+      paymentMethod: "Credit Card",
+      status: "Paid",
+      createdAt: Date.now() - 86400000, // 1 day ago
+    },
+    {
+      id: "2",
+      owner: "Jane Smith",
+      amount: 50,
+      currency: "EUR",
+      paymentMethod: "PayPal",
+      status: "Pending",
+      createdAt: Date.now() - 172800000, // 2 days ago
+    },
+    {
+      id: "3",
+      owner: "Michael Johnson",
+      amount: 200,
+      currency: "GBP",
+      paymentMethod: "Bank Transfer",
+      status: "Paid",
+      createdAt: Date.now() - 259200000, // 3 days ago
+    },
+    {
+      id: "4",
+      owner: "Emily Brown",
+      amount: 75,
+      currency: "CAD",
+      paymentMethod: "Credit Card",
+      status: "Paid",
+      createdAt: Date.now() - 345600000, // 4 days ago
+    },
+    {
+      id: "5",
+      owner: "William Lee",
+      amount: 120,
+      currency: "AUD",
+      paymentMethod: "PayPal",
+      status: "Pending",
+      createdAt: Date.now() - 432000000, // 5 days ago
+    },
+  ]
 
-  const [invoices, setInvoices] = useState([])
+  const [invoices, setInvoices] = useState(dummyData)
 
   useEffect(() => {
     async function invoices() {
-      actor
-        .get_all_invoices_to_admin()
-        .then(async (data) => {
-          console.log("woened ", { data })
-          setInvoices(data)
+
+      actor.get_all_invoices_to_admin()
+        .then((data) => {
+          console.log("invoices", { data })
+
+          if (data.status) {
+            if ("success" in data.body) {
+              setInvoices(data.body.success)
+            }
+            toast.success(data.message)
+          } else {
+            toast.error(data.message)
+          }
         })
         .catch((err) => {
-          console.log(err)
+          console.log("invoices err", { err })
+          toast.error(err.message)
         })
+
     }
 
     isAuthenticated && actor && invoices()
@@ -92,11 +102,17 @@ export default function Admin() {
   }
 
   const handleStatusChange = (id, selectedValue) => {
-    console.log(`Invoice ID ${id} status changed to: ${selectedValue}`)
-    if (selectedValue === "Pending") {
-      toast.error(`Invoice ID ${id} status changed to: ${selectedValue}`)
-    } else if (selectedValue === "Completed") {
-      toast.success(`Invoice ID ${id} status changed to: ${selectedValue}`)
+    const confirmed = window.confirm(
+      `Do you want to change the status of Invoice ID ${id} to: ${selectedValue}?`,
+    )
+
+    if (confirmed) {
+      console.log(`Invoice ID ${id} status changed to: ${selectedValue}`)
+      if (selectedValue === "Pending") {
+        toast.error(`Invoice ID ${id} status changed to: ${selectedValue}`)
+      } else if (selectedValue === "Completed") {
+        toast.success(`Invoice ID ${id} status changed to: ${selectedValue}`)
+      }
     } else {
     }
   }

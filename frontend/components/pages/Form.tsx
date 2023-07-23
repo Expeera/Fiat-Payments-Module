@@ -4,29 +4,23 @@ import { AppContext } from "../../App"
 import { toast } from "react-toastify"
 import "./table.css" // Import the CSS file
 import { Invoice } from "../../Hooks/UseAuthClient"
-import Button from "react-bootstrap/Button"
-import Modal from "react-bootstrap/Modal"
+
 import { Row, Col } from "react-bootstrap"
+export interface Item {
+  id: number
+  name: string
+  price: number
+}
 
 export interface CreateInvoiceBody {
   amount: number
   paymentMethod: string
   currency: string
-  items: [
-    {
-      id: number
-      name: string
-      price: number
-    },
-  ]
+  items: Array<Item>
 }
 
 export default function Form() {
   const [currency, setCurrency] = useState("USD")
-  const [show, setShow] = useState(false)
-
-  const handleClose = () => setShow(false)
-  const handleShow = () => setShow(true)
 
   const { logout, isAuthenticated, actor, isOwner } = useContext(AppContext)
   const [formData, setFormData] = useState({
@@ -43,58 +37,160 @@ export default function Form() {
       name: "Prodct 1",
       price: (10 + Math.random() * 190).toFixed(2),
       quntity: 12,
-      image: "../../images/img-placeholder.webp",
+      image: "../../assets/img-placeholder.webp",
     },
     {
       id: 2,
       name: "Prodct 2",
       price: (10 + Math.random() * 190).toFixed(2),
       quntity: 12,
-      image: "../../images/img-placeholder.webp",
+      image: "../../assets/img-placeholder.webp",
     },
     {
       id: 3,
       name: "Prodct 3",
       price: (10 + Math.random() * 190).toFixed(2),
       quntity: 12,
-      image: "../../images/img-placeholder.webp",
+      image: "../../assets/img-placeholder.webp",
     },
     {
       id: 4,
       name: "Prodct 4",
       price: (10 + Math.random() * 190).toFixed(2),
       quntity: 12,
-      image: "../../images/img-placeholder.webp",
+      image: "../../assets/img-placeholder.webp",
     },
     {
       id: 5,
       name: "Prodct 5",
       price: (10 + Math.random() * 190).toFixed(2),
       quntity: 12,
-      image: "../../images/img-placeholder.webp",
+      image: "../../assets/img-placeholder.webp",
     },
     {
       id: 6,
       name: "Prodct 6",
       price: (10 + Math.random() * 190).toFixed(2),
       quntity: 12,
-      image: "../../images/img-placeholder.webp",
+      image: "../../assets/img-placeholder.webp",
     },
   ])
 
-  const [cart, setCart] = useState([])
+  const [cart, setCart] = useState({
+    products: [], // Array to store the products with ID, quantity, and total price
+    totalPrice: 0, // Total cart price
+  })
 
   const addToCart = (product) => {
-    // Check if the product already exists in the cart
-    const existingProduct = cart.find((item) => item.id === product.id)
+    const existingProduct = cart.products.find((item) => item.id === product.id)
 
     if (existingProduct) {
-      toast.error(`${product.name} is already in the cart.`)
+      // If the product already exists in the cart, update its quantity
+      existingProduct.quantity++
+      existingProduct.totalPrice = (
+        existingProduct.price * existingProduct.quantity
+      ).toFixed(2)
+      setCart((prevCart) => ({
+        ...prevCart,
+        totalPrice: (
+          parseFloat(prevCart.totalPrice) + parseFloat(existingProduct.price)
+        ).toFixed(2),
+      }))
     } else {
+      var carts = [...cart, { ...product }]
       // Product does not exist in the cart, add it with a quantity property set to 1
-      setCart([...cart, { ...product }])
-      toast.success(`${product.name} added successfully.`)
+      const newProduct = {
+        ...product,
+        quantity: 1,
+        totalPrice: product.price,
+      }
+      setCart((prevCart) => ({
+        ...prevCart,
+        products: [...prevCart.products, newProduct],
+        totalPrice: (
+          parseFloat(prevCart.totalPrice) + parseFloat(newProduct.price)
+        ).toFixed(2),
+      }))
     }
+
+    toast.success(`${product.name} added successfully.`)
+  }
+
+  const removeFromCart = (productId) => {
+    const updatedCart = { ...cart }
+
+    const existingProductIndex = updatedCart.products.findIndex(
+      (item) => item.id === productId,
+    )
+    if (existingProductIndex !== -1) {
+      const removedProduct = updatedCart.products[existingProductIndex]
+      updatedCart.products.splice(existingProductIndex, 1)
+      updatedCart.totalPrice = (
+        parseFloat(updatedCart.totalPrice) -
+        parseFloat(removedProduct.totalPrice)
+      ).toFixed(2)
+
+      setCart(updatedCart)
+
+      toast.success(
+        `Product with ID ${productId} has been removed from the cart.`,
+      )
+    } else {
+      toast.error(`Product with ID ${productId} does not exist in the cart.`)
+    }
+  }
+
+  const decreaseQuantityInCart = (productId) => {
+    const updatedCart = { ...cart }
+
+    const existingProduct = updatedCart.products.find(
+      (item) => item.id === productId,
+    )
+    if (existingProduct && existingProduct.quantity > 1) {
+      existingProduct.quantity--
+      existingProduct.totalPrice = (
+        existingProduct.price * existingProduct.quantity
+      ).toFixed(2)
+      updatedCart.totalPrice = (
+        parseFloat(updatedCart.totalPrice) - parseFloat(existingProduct.price)
+      ).toFixed(2)
+
+      setCart(updatedCart)
+
+      toast.success(`Quantity of Product with ID ${productId} decreased by 1.`)
+    } else {
+      toast.error(
+        `Quantity of Product with ID ${productId} cannot be decreased further.`,
+      )
+    }
+  }
+
+  const increaseQuantityInCart = (productId) => {
+    const updatedCart = { ...cart }
+
+    const existingProduct = updatedCart.products.find(
+      (item) => item.id === productId,
+    )
+    if (existingProduct) {
+      existingProduct.quantity++
+      existingProduct.totalPrice = (
+        existingProduct.price * existingProduct.quantity
+      ).toFixed(2)
+      updatedCart.totalPrice = (
+        parseFloat(updatedCart.totalPrice) + parseFloat(existingProduct.price)
+      ).toFixed(2)
+
+      setCart(updatedCart)
+
+      toast.success(`Quantity of Product with ID ${productId} increased by 1.`)
+    } else {
+      toast.error(`Product with ID ${productId} does not exist in the cart.`)
+    }
+  }
+
+  const getQuantityInCart = (productId) => {
+    const product = cart.products.find((item) => item.id === productId)
+    return product ? product.quantity : 0
   }
 
   const handleChange = (e) => {
@@ -112,8 +208,20 @@ export default function Form() {
   const handleSubmit = (e) => {
     e.preventDefault()
 
+    var amount = 0
+    var carts = cart.map((item) => {
+      amount += parseFloat(item.price)
+      return {
+        id: parseInt(item.id),
+        name: item.name,
+        price: parseFloat(item.price),
+      }
+    })
+
+    console.log(carts)
+
     let data: CreateInvoiceBody = {
-      amount: parseFloat(formData.amount.toString()),
+      amount: amount,
       paymentMethod: formData.paymentMethod,
       currency: formData.currency,
       items: carts,
@@ -138,55 +246,6 @@ export default function Form() {
         toast.error(err.message)
       })
   }
-  const dummyData = [
-    {
-      id: "1",
-      owner: "John Doe",
-      amount: 100,
-      currency: "USD",
-      paymentMethod: "Credit Card",
-      status: "Paid",
-      createdAt: Date.now() - 86400000, // 1 day ago
-    },
-    {
-      id: "2",
-      owner: "Jane Smith",
-      amount: 50,
-      currency: "EUR",
-      paymentMethod: "PayPal",
-      status: "Pending",
-      createdAt: Date.now() - 172800000, // 2 days ago
-    },
-    {
-      id: "3",
-      owner: "Michael Johnson",
-      amount: 200,
-      currency: "GBP",
-      paymentMethod: "Bank Transfer",
-      status: "Paid",
-      createdAt: Date.now() - 259200000, // 3 days ago
-    },
-    {
-      id: "4",
-      owner: "Emily Brown",
-      amount: 75,
-      currency: "CAD",
-      paymentMethod: "Credit Card",
-      status: "Paid",
-      createdAt: Date.now() - 345600000, // 4 days ago
-    },
-    {
-      id: "5",
-      owner: "William Lee",
-      amount: 120,
-      currency: "AUD",
-      paymentMethod: "PayPal",
-      status: "Pending",
-      createdAt: Date.now() - 432000000, // 5 days ago
-    },
-  ]
-
-  const [invoices, setInvoices] = useState(dummyData)
 
   useEffect(() => {
     async function myInvoice() {
@@ -218,6 +277,10 @@ export default function Form() {
     navigate("/auth/login")
   }
 
+  useEffect(() => {
+    console.log(cart)
+  }, [cart])
+
   return (
     <>
       <div
@@ -227,7 +290,7 @@ export default function Form() {
           justifyContent: "space-between",
         }}
       >
-        <Row>
+        <Row className="justify-content-center">
           <Col lg={8}>
             <div
               style={{
@@ -265,29 +328,87 @@ export default function Form() {
                         {product.price} {currency}
                       </p>
                       <p style={{ fontWeight: 600, fontSize: "14px" }}>
-                        Quntity: {product.quntity}
+                        Quntity: {getQuantityInCart(product.id)}
                       </p>
-                      <button
-                        onClick={(e) => addToCart(product)}
-                        style={{
-                          padding: "8px 12px",
-                          backgroundColor: "#28a745",
-                          color: "#fff",
-                          border: "none",
-                          cursor: "pointer",
-                          background: "#28a745",
-                          borderRadius: "8px",
-                          fontSize: "14px",
-                        }}
+                      <div
+                        className="d-flex "
+                        style={{ flexDirection: "column" }}
                       >
-                        Add To Cart
-                      </button>
+                        <button
+                          onClick={(e) => addToCart(product)}
+                          style={{
+                            padding: "8px 12px",
+                            backgroundColor: "#28a745",
+                            color: "#fff",
+                            border: "none",
+                            cursor: "pointer",
+                            background: "#28a745",
+                            borderRadius: "8px",
+                            fontSize: "14px",
+                            margin: "5px",
+                          }}
+                        >
+                          Add To Cart
+                        </button>
+                        <button
+                          onClick={(e) => decreaseQuantityInCart(product.id)}
+                          style={{
+                            padding: "8px 12px",
+                            backgroundColor: "#dc3545",
+                            color: "#fff",
+                            border: "none",
+                            cursor: "pointer",
+                            background: "#dc3545",
+                            borderRadius: "8px",
+                            fontSize: "14px",
+                            margin: "5px",
+                          }}
+                        >
+                          Remove From Cart
+                        </button>
+                        {/* <div className="d-flex justify-content-center">
+                          
+                           <button
+                          onClick={(e) => removeFromCart(product.id)}
+                          style={{
+                            padding: "8px 12px",
+                            backgroundColor: "#dc3545",
+                            color: "#fff",
+                            border: "none",
+                            cursor: "pointer",
+                            background: "#dc3545",
+                            borderRadius: "8px",
+                            fontSize: "14px",
+                            margin: "5px",
+                          }}
+                        >
+                          -
+                        </button>
+                          <button
+                            onClick={(e) => increaseQuantityInCart(product.id)}
+                            style={{
+                              padding: "8px 12px",
+                              backgroundColor: "#28a745",
+                              color: "#fff",
+                              border: "none",
+                              cursor: "pointer",
+                              background: "#28a745",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              margin: "5px",
+                            }}
+                          >
+                            +
+                          </button>
+                        </div> */}
+                      </div>
                     </div>
                   </Col>
                 ))}
               </Row>
             </div>
           </Col>
+
           <Col lg={4} className="d-flex align-items-center">
             <div
               style={{
@@ -545,84 +666,6 @@ export default function Form() {
             Logout
           </button>
         </div> */}
-      </div>
-      <div
-        style={{
-          width: "100%",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          marginTop: "20px",
-        }}
-      >
-        <div>
-          <h2>My Invoices</h2>
-        </div>
-        <div className="table-container">
-          <table className="styled-table">
-            <thead>
-              <tr>
-                <th>Invoice NO</th>
-                <th>Amount</th>
-                <th>currency</th>
-                <th>Payment Method</th>
-                <th>status</th>
-                <th>Create At</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {invoices.map((item) => (
-                <tr key={item.id}>
-                  <td>{parseInt(item.id)}</td>
-                  <td>{item.amount}</td>
-                  <td>{item.currency}</td>
-                  <td>{item.paymentMethod}</td>
-                  <td>{item.status}</td>
-                  <td>
-                    {new Date(
-                      parseInt(item.createdAt) / (1000 * 1000),
-                    ).toLocaleString()}
-                  </td>
-                  <td className="d-flex justify-content-center align-items-center gap-1">
-                    {item.status == "Pending" ? (
-                      <a href={item.paymentLink} target="_blank">
-                        Go To Pay
-                      </a>
-                    ) : (
-                      ""
-                    )}
-                    <>
-                      <Button variant="primary" onClick={handleShow}>
-                        View
-                      </Button>
-
-                      <Modal show={show} onHide={handleClose}>
-                        <Modal.Header closeButton>
-                          <Modal.Title>Invoice NO: {item.id}</Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>
-                          <p>Amount: {item.amount}</p>
-                          <p>Currency: {item.currency}</p>
-                          <p>PaymentMethod: {item.paymentMethod}</p>
-                          <p>Status: {item.status}</p>
-                        </Modal.Body>
-                        <Modal.Footer>
-                          <Button variant="secondary" onClick={handleClose}>
-                            Close
-                          </Button>
-                          <Button variant="primary" onClick={handleClose}>
-                            Save Changes
-                          </Button>
-                        </Modal.Footer>
-                      </Modal>
-                    </>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       </div>
     </>
   )

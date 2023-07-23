@@ -2,7 +2,8 @@
 module {
 
     // Global Messages
-    public let unauthorized:Text = "Unauthorized";
+    public let not_authorized:Text = "Not Authorized";
+    public let not_owner:Text = "You are not owner";
     public let success_operation:Text = "Success Operation";
 
     // Validation messages
@@ -11,8 +12,8 @@ module {
     public let currency_is_required:Text = "The currency is required";
     public let currency_invalid_value:Text = "The Currency Invalid value";
     public let invoice_amount_must_be_greater_than_zero:Text = "The invoice amount must be greater than zero";
+    public let sum_invoice_items_is_incorrect:Text = "The sum of the invoice items is incorrect";
 
-    public let not_authorized:Text = "Not Authorized";
     public let transaction_id_is_required:Text =  "The transaction id is required";
     public let invoice_number_is_required:Text =  "The invoice number is required";
     public let invoice_not_found:Text =  "Invoice not found";

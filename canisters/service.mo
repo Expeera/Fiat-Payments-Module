@@ -79,8 +79,6 @@ module {
                 case (?y) { y };
             };
 
-            Debug.print(decoded_text);
-
             // Convert the decoded text to Blob
             let blob = serdeJson.fromText(decoded_text);
 
@@ -126,8 +124,6 @@ module {
                 case (?y) { y };
             };
 
-            Debug.print(decoded_text);
-
             // Convert the decoded text to Blob
             let blob = serdeJson.fromText(decoded_text);
 
@@ -160,7 +156,7 @@ module {
             access_token: Text;
         };
 
-        private type CreateSessionApi = {
+        private type CreateOrderApi = {
             id: Text;
             links: [
                 {
@@ -171,16 +167,16 @@ module {
             ];
         };
 
-        public type CreateSession = {
+        public type CreateOrder = {
             id: Text;
             url: Text;
         };
 
-        public type RetrieveSession = {
+        public type RetrieveOrder = {
             status: Text;
         };
 
-        public func create_session(invoiceNo:Nat, invoice : Types.Request.CreateInvoiceBody): async Result.Result<?CreateSession, ?ErrorResponse> {
+        public func create_order(invoiceNo:Nat, invoice : Types.Request.CreateInvoiceBody): async Result.Result<?CreateOrder, ?ErrorResponse> {
             
            let sessionResult:Result.Result<?Oauth2Token, ?ErrorResponse> = await generate_access_token();
             switch (sessionResult) {
@@ -215,7 +211,6 @@ module {
                             let request_body_str: Text = "{\"intent\":\"CAPTURE\",\"purchase_units\":[{\"amount\":{\"currency_code\":\""# invoice.currency #"\",\"value\":\""# Int.toText(Float.toInt(invoice.amount)) #"\"}}],\"application_context\":{\"return_url\":\""# Config.get_paypal_success_url(invoiceNo) #"\",\"cancel_url\":\""# Config.get_paypal_cancel_url(invoiceNo) #"\"}}";
                             let request_body_as_Blob: Blob = Text.encodeUtf8(request_body_str);
 
-                            Debug.print(request_body_str);
                             let http_request : Http.IcHttp.HttpRequest = {
                                 url = base_url # "v2/checkout/orders";
                                 headers = request_headers;
@@ -234,13 +229,10 @@ module {
                                 case (?y) { y };
                             };
 
-                            Debug.print("Response");
-                            Debug.print(decoded_text);
-
                             let blob = serdeJson.fromText(decoded_text);
 
                             // Deserialize the blob to CreateSession type
-                            let checkout : ?CreateSessionApi = from_candid(blob);
+                            let checkout : ?CreateOrderApi = from_candid(blob);
 
                              return switch(checkout) {
                                 case(null) {
@@ -254,8 +246,6 @@ module {
                                     });
                                 };
                             };
-
-                            //  return #ok(session);
                         };
                    };
                 };
@@ -293,7 +283,6 @@ module {
                 case (null) { "{\"error\" : \"\", \"error_description\" : \"No value returned\"}" };
                 case (?y) { y };
             };
-            Debug.print(decoded_text);
 
             let blob = serdeJson.fromText(decoded_text);
 
@@ -313,7 +302,7 @@ module {
             };
         };
 
-        public func retrieve_session(order_id:Text) : async Result.Result<?RetrieveSession, ?ErrorResponse>  {
+        public func retrieve_order(order_id:Text) : async Result.Result<?RetrieveOrder, ?ErrorResponse>  {
 
             let sessionResult:Result.Result<?Oauth2Token, ?ErrorResponse> = await generate_access_token();
             switch (sessionResult) {
@@ -366,26 +355,107 @@ module {
                                 case (?y) { y };
                             };
 
-                            Debug.print(decoded_text);
-
                             // Convert the decoded text to Blob
                             let blob = serdeJson.fromText(decoded_text);
 
                             // Deserialize the blob to RetrieveSession type
-                            let session : ?RetrieveSession = from_candid(blob);
+                            let order : ?RetrieveOrder = from_candid(blob);
 
-                            return switch(session){
+                            return switch(order){
                                 case(null) {
                                     let errResponse : ?ErrorResponse = from_candid(blob);
                                     return #err(errResponse);
                                 };
-                                case(_session) {
-                                    return #ok(_session);
+                                case(?_order) {
+
+                                    if(Text.equal(_order.status, "APPROVED")) {
+                                        let captureResult: Result.Result<?RetrieveOrder, ?ErrorResponse> =  await capture_order(_session.access_token, order_id);
+
+                                        return switch (captureResult) {
+                                            case (#err err) { 
+                                                switch(err) {
+                                                    case(null) {
+                                                        return #err(?{
+                                                            error= "";
+                                                            error_description = "";
+                                                        });
+                                                    };
+                                                    case(?_err) {
+                                                        return #err(err);
+                                                    };
+                                                };
+                                            };
+
+                                            case (#ok capture) { 
+                                                switch(capture) {
+                                                    case(null){
+                                                        return #err(?{
+                                                            error= "";
+                                                            error_description = "";
+                                                        });
+                                                    };
+                                                    case(?_capture) {
+                                                        return #ok(capture);
+                                                    };
+                                                };
+                                            };
+
+                                        };
+
+                                    } else {
+                                        return #ok(order);
+                                    };
+
                                 };
                             };
 
                         };
                    };
+                };
+            };
+        };
+
+        private func capture_order(access_token:Text, order_id:Text) : async Result.Result<?RetrieveOrder, ?ErrorResponse>  {
+
+            // Set the request headers
+            let request_headers = [
+                { name= "Content-Type"; value = "application/json" },
+                { name= "Authorization"; value = "Bearer " # access_token }
+            ];
+
+            // Create the HTTP request object
+            let http_request : Http.IcHttp.HttpRequest = {
+                url = base_url # "v2/checkout/orders/" # order_id # "/capture";
+                headers = request_headers;
+                body = null; 
+                method = #post;
+            };
+
+            // Minimum cycles needed to pass the CI tests. Cycles needed will vary on many things, such as the size of the HTTP response and subnet.
+            Cycles.add(220_131_200_000); 
+
+            // Send the HTTP request and await the response
+            let http_response : Http.IcHttp.HttpResponse = await ic.http_request(http_request);
+
+            // Decode the response body text
+            let decoded_text: Text = switch (Text.decodeUtf8(http_response.body)) {
+                case (null) { "{\"error\" : \"\", \"error_description\" : \"No value returned\"}" };
+                case (?y) { y };
+            };
+
+            // Convert the decoded text to Blob
+            let blob = serdeJson.fromText(decoded_text);
+
+            // Deserialize the blob to RetrieveSession type
+            let result : ?RetrieveOrder = from_candid(blob);
+
+            return switch(result){
+                case(null) {
+                    let errResponse : ?ErrorResponse = from_candid(blob);
+                    return #err(errResponse);
+                };
+                case(_result) {
+                    return #ok(_result);
                 };
             };
         };

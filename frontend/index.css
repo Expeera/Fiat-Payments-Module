@@ -119,3 +119,10 @@ body {
 .bg-custom-card {
   background: linear-gradient(162.13deg, #2a2b31 -97.62%, #18191d 162.12%);
 }
+@media (min-width: 576px) {
+  .modal-dialog {
+    max-width: 80% !important;
+    margin-right: auto;
+    margin-left: auto;
+  }
+}

@@ -1,4 +1,18 @@
 type StatusCode = nat;
+type Response_3 = 
+ record {
+   body: ResponseStatus_3;
+   message: text;
+   status: bool;
+   status_code: StatusCode;
+ };
+type Response_2 = 
+ record {
+   body: ResponseStatus_2;
+   message: text;
+   status: bool;
+   status_code: StatusCode;
+ };
 type Response_1 = 
  record {
    body: ResponseStatus_1;
@@ -6,15 +20,25 @@ type Response_1 =
    status: bool;
    status_code: StatusCode;
  };
-type ResponseStatus_1 = 
+type ResponseStatus_3 = 
  variant {
    err: record {};
    success: ConfirmInvoiceBody__1;
  };
-type ResponseStatus = 
+type ResponseStatus_2 = 
+ variant {
+   err: record {};
+   success: bool;
+ };
+type ResponseStatus_1 = 
  variant {
    err: record {};
    success: CreateInvoiceBody__1;
+ };
+type ResponseStatus = 
+ variant {
+   err: record {};
+   success: vec Invoice;
  };
 type Response = 
  record {
@@ -70,14 +94,20 @@ type ConfirmInvoiceBody =
    isSuccess: bool;
    paymentMethod: text;
  };
+type ConfirmInvoiceAdminBody = 
+ record {
+   invoiceNo: nat;
+   isCompleted: bool;
+   paymentMethod: text;
+ };
 service : {
-  change_invoice_status: (ConfirmInvoiceBody) -> (Response_1);
-  create_invoice: (CreateInvoiceBody) -> (Response);
+  change_invoice_status: (ConfirmInvoiceBody) -> (Response_3);
+  change_invoice_status_to_admin: (ConfirmInvoiceAdminBody) -> (Response_2);
+  create_invoice: (CreateInvoiceBody) -> (Response_1);
   getOwner: () -> (text);
   get_actor_id_as_text: () -> (text) query;
-  get_all_invoices_to_admin: () -> (vec Invoice);
+  get_all_invoices_to_admin: () -> (Response);
   get_my_invoices: () -> (vec Invoice) query;
   invoiceCount: () -> (nat);
   isOwner: () -> (bool) query;
-  test1: (text) -> (text);
 }
